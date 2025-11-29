@@ -99,9 +99,6 @@ Redoc:
 http://localhost:8000/redoc
 ```
 ## Project Structure
-
-To deploy this project run
-
 ```bash
 vending-machine-app/
 │
