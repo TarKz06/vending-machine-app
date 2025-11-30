@@ -1,5 +1,4 @@
-// src/features/vending/components/ProductList.tsx
-import type { Product } from "../types";
+import type { Product } from "@/lib/types";
 
 type ProductListProps = {
     products: Product[];
@@ -20,6 +19,7 @@ export function ProductList({ products }: ProductListProps) {
         >
             <thead>
                 <tr>
+                    <th style={thStyle}>Image</th>
                     <th style={thStyle}>Name</th>
                     <th style={thStyle}>Price (THB)</th>
                     <th style={thStyle}>Stock</th>
@@ -28,9 +28,25 @@ export function ProductList({ products }: ProductListProps) {
             <tbody>
                 {products.map((p) => (
                     <tr key={p.id}>
+                        <td style={tdStyle}>
+                            {p.image_url ? (
+                                <img
+                                    src={p.image_url}
+                                    alt={p.name}
+                                    style={{
+                                        width: 48,
+                                        height: 48,
+                                        objectFit: "cover",
+                                        borderRadius: 8,
+                                    }}
+                                />
+                            ) : (
+                                "-"
+                            )}
+                        </td>
                         <td style={tdStyle}>{p.name}</td>
                         <td style={tdStyle}>{p.price}</td>
-                        <td style={tdStyle}>{p.stock}</td>
+                        <td style={tdStyle}>{p.stock_quantity}</td>
                     </tr>
                 ))}
             </tbody>

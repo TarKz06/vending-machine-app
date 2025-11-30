@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware  # ⭐ เพิ่มบรรทัดนี้
+from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
 from .database import Base, engine

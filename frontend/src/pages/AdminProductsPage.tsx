@@ -45,7 +45,7 @@ export function AdminProductsPage() {
                 name: product.name,
                 price: product.price.toString(),
                 stock: product.stock_quantity.toString(),
-                image_url: '',
+                image_url: product.image_url ?? '',
             });
         } else {
             setEditingProduct(null);

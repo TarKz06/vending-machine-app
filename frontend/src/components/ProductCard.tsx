@@ -15,18 +15,31 @@ export function ProductCard({ product, onSelect, isSelected }: ProductCardProps)
 
     return (
         <Card
-            className={`transition-all duration-200 ${isSelected ? 'ring-2 ring-blue-500 shadow-md' : 'hover:shadow-md'}`}
+            className={`transition-all duration-200 ${isSelected ? 'ring-2 ring-blue-500 shadow-md' : 'hover:shadow-md'
+                }`}
         >
             <div className="flex flex-col items-center text-center space-y-4">
                 <div className="h-32 w-32 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden">
-                    {/* Backend doesn't provide image_url, so we use a placeholder or check if it exists in future */}
-                    <Package className="h-12 w-12 text-gray-400" />
+                    {product.image_url ? (
+                        <img
+                            src={product.image_url}
+                            alt={product.name}
+                            className="h-full w-full object-cover"
+                        />
+                    ) : (
+                        <Package className="h-12 w-12 text-gray-400" />
+                    )}
                 </div>
 
                 <div className="space-y-1">
                     <h3 className="font-semibold text-lg text-gray-900">{product.name}</h3>
-                    <p className="text-2xl font-bold text-blue-600">{formatCurrency(product.price)}</p>
-                    <p className={`text-sm ${isOutOfStock ? 'text-red-500 font-medium' : 'text-gray-500'}`}>
+                    <p className="text-2xl font-bold text-blue-600">
+                        {formatCurrency(product.price)}
+                    </p>
+                    <p
+                        className={`text-sm ${isOutOfStock ? 'text-red-500 font-medium' : 'text-gray-500'
+                            }`}
+                    >
                         {isOutOfStock ? 'Out of Stock' : `${product.stock_quantity} available`}
                     </p>
                 </div>
@@ -37,7 +50,7 @@ export function ProductCard({ product, onSelect, isSelected }: ProductCardProps)
                     variant={isSelected ? 'primary' : 'outline'}
                     className="w-full"
                 >
-                    {isOutOfStock ? 'Unavailable' : (isSelected ? 'Selected' : 'Select')}
+                    {isOutOfStock ? 'Unavailable' : isSelected ? 'Selected' : 'Select'}
                 </Button>
             </div>
         </Card>

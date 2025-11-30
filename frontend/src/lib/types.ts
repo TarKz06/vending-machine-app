@@ -2,14 +2,13 @@ export interface Product {
     id: number;
     name: string;
     price: number;
-    stock_quantity: number; // Changed from stock
+    stock_quantity: number;
     is_active: boolean;
-    // image_url is not in backend
+    image_url?: string | null;
 }
 
 export interface CashUnit {
-    // id is not in backend, use denomination as key
-    denomination: number; // Changed from value
+    denomination: number;
     quantity: number;
 }
 
@@ -20,7 +19,7 @@ export interface PaidItem {
 
 export interface PurchaseRequest {
     product_id: number;
-    paid: PaidItem[]; // Changed from inserted_money
+    paid: PaidItem[];
 }
 
 export interface ChangeItem {
@@ -33,6 +32,6 @@ export interface PurchaseResponse {
     product_name: string;
     price: number;
     paid_amount: number;
-    change_amount: number; // Changed from change
-    change_breakdown: ChangeItem[]; // Changed from breakdown
+    change_amount: number;
+    change_breakdown: ChangeItem[];
 }
