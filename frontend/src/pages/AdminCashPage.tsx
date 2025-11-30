@@ -123,7 +123,9 @@ export function AdminCashPage() {
         <Layout>
             <div className="space-y-6">
                 <div className="flex justify-between items-center">
-                    <h1 className="text-2xl font-bold text-gray-900">Cash Unit Management</h1>
+                    <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900">
+                        Cash Unit Management
+                    </h1>
                     <Button onClick={() => handleOpenModal()}>
                         <Plus className="h-4 w-4 mr-2" />
                         Add Cash Unit

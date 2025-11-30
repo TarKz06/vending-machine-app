@@ -18,7 +18,7 @@ export function Card({ children, className, title, description, footer }: CardPr
                     {description && <p className="text-sm text-gray-500 mt-1">{description}</p>}
                 </div>
             )}
-            <div className="p-6">
+            <div className="p-2 md:p-6">
                 {children}
             </div>
             {footer && (

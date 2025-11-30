@@ -26,10 +26,11 @@ export function Button({
     };
 
     const sizes = {
-        sm: 'px-3 py-1.5 text-sm',
-        md: 'px-4 py-2 text-base',
-        lg: 'px-6 py-3 text-lg',
+        sm: 'px-2 py-1 text-[10px] md:px-3 md:py-1.5 md:text-xs',
+        md: 'px-3 py-1.5 text-xs md:px-4 md:py-2 md:text-sm',
+        lg: 'px-4 py-2 text-sm md:px-5 md:py-2.5 md:text-base',
     };
+
 
     return (
         <button
