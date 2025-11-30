@@ -8,15 +8,25 @@ interface ProductCardProps {
     product: Product;
     onSelect: (product: Product) => void;
     isSelected?: boolean;
+    status?: 'default' | 'sufficient' | 'insufficient';
 }
 
-export function ProductCard({ product, onSelect, isSelected }: ProductCardProps) {
+export function ProductCard({ product, onSelect, isSelected, status = 'default' }: ProductCardProps) {
     const isOutOfStock = product.stock_quantity === 0;
+
+    let borderClass = 'hover:shadow-md';
+
+    if (status === 'sufficient') {
+        borderClass = 'ring-2 ring-blue-500 shadow-md bg-blue-50';
+    } else if (status === 'insufficient') {
+        borderClass = 'ring-2 ring-red-500 shadow-md bg-red-50 opacity-80';
+    } else if (isSelected) {
+        borderClass = 'ring-2 ring-blue-500 shadow-md';
+    }
 
     return (
         <Card
-            className={`transition-all duration-200 ${isSelected ? 'ring-2 ring-blue-500 shadow-md' : 'hover:shadow-md'
-                }`}
+            className={`transition-all duration-200 ${borderClass}`}
         >
             <div className="flex flex-col items-center text-center space-y-4">
                 <div className="h-32 w-32 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden">

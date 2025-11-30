@@ -2,18 +2,20 @@ import { useState, useEffect } from 'react';
 import { Layout } from '@/components/Layout';
 import { ProductCard } from '@/components/ProductCard';
 import { Button } from '@/components/Button';
-import { Input } from '@/components/Input';
+
 import { Card } from '@/components/Card';
 import { Modal } from '@/components/Modal';
 import { api } from '@/lib/api';
 import { type Product, type PurchaseResponse } from '@/lib/types';
 import { formatCurrency } from '@/lib/utils';
-import { Coins, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Coins, AlertCircle, CheckCircle2, RotateCcw } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export function CustomerPage() {
     const [products, setProducts] = useState<Product[]>([]);
+    const [cashUnits, setCashUnits] = useState<number[]>([]);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-    const [insertedMoney, setInsertedMoney] = useState<string>('');
+    const [totalInserted, setTotalInserted] = useState<number>(0);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [purchaseResult, setPurchaseResult] = useState<PurchaseResponse | null>(null);
@@ -21,6 +23,7 @@ export function CustomerPage() {
 
     useEffect(() => {
         fetchProducts();
+        fetchCashUnits();
     }, []);
 
     const fetchProducts = async () => {
@@ -38,16 +41,32 @@ export function CustomerPage() {
         }
     };
 
-    const handlePurchase = async () => {
-        if (!selectedProduct || !insertedMoney) return;
-
-        const moneyAmount = parseFloat(insertedMoney);
-        if (isNaN(moneyAmount) || moneyAmount <= 0) {
-            setError('Please enter a valid amount.');
-            return;
+    const fetchCashUnits = async () => {
+        try {
+            const response = await api.get<{ denomination: number }[]>('/cash-units');
+            const denominations = Array.from(new Set(response.data.map(u => u.denomination))).sort((a, b) => a - b);
+            setCashUnits(denominations);
+        } catch (err) {
+            console.error('Failed to fetch cash units:', err);
         }
+    };
 
-        if (moneyAmount < selectedProduct.price) {
+    const handleInsertMoney = (amount: number) => {
+        setTotalInserted(prev => prev + amount);
+        setError(null);
+    };
+
+    const handleReturnMoney = () => {
+        setTotalInserted(0);
+        setSelectedProduct(null);
+        setError(null);
+        setPurchaseResult(null);
+    };
+
+    const handlePurchase = async () => {
+        if (!selectedProduct) return;
+
+        if (totalInserted < selectedProduct.price) {
             setError(`Insufficient funds. Please insert at least ${formatCurrency(selectedProduct.price)}.`);
             return;
         }
@@ -58,13 +77,13 @@ export function CustomerPage() {
         try {
             const response = await api.post<PurchaseResponse>('/purchases', {
                 product_id: selectedProduct.id,
-                paid: [{ denomination: moneyAmount, quantity: 1 }],
+                paid: [{ denomination: totalInserted, quantity: 1 }],
             });
             setPurchaseResult(response.data);
             setShowResultModal(true);
             fetchProducts();
             setSelectedProduct(null);
-            setInsertedMoney('');
+            setTotalInserted(0);
         } catch (err: any) {
             console.error('Purchase failed:', err);
             const message =
@@ -93,17 +112,25 @@ export function CustomerPage() {
                 )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {products.map((product) => (
-                        <ProductCard
-                            key={product.id}
-                            product={product}
-                            onSelect={(p) => {
-                                setError(null);
-                                setSelectedProduct(p);
-                            }}
-                            isSelected={selectedProduct?.id === product.id}
-                        />
-                    ))}
+                    {products.map((product) => {
+                        let status: 'default' | 'sufficient' | 'insufficient' = 'default';
+                        if (totalInserted > 0) {
+                            status = totalInserted >= product.price ? 'sufficient' : 'insufficient';
+                        }
+
+                        return (
+                            <ProductCard
+                                key={product.id}
+                                product={product}
+                                onSelect={(p) => {
+                                    setError(null);
+                                    setSelectedProduct(p);
+                                }}
+                                isSelected={selectedProduct?.id === product.id}
+                                status={status}
+                            />
+                        );
+                    })}
                 </div>
 
                 <Card className="sticky bottom-4 shadow-xl border-blue-100 bg-white/90 backdrop-blur-sm">
@@ -120,27 +147,49 @@ export function CustomerPage() {
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-4 w-full md:w-auto">
-                            <Input
-                                type="number"
-                                placeholder="Insert Money (THB)"
-                                value={insertedMoney}
-                                onChange={(e) => {
-                                    setError(null);
-                                    setInsertedMoney(e.target.value);
-                                }}
-                                className="w-full md:w-48"
-                                min="0"
-                            />
-                            <Button
-                                onClick={handlePurchase}
-                                disabled={!selectedProduct || !insertedMoney || loading}
-                                isLoading={loading}
-                                size="lg"
-                                className="w-full md:w-auto"
-                            >
-                                Purchase
-                            </Button>
+                        <div className="flex flex-col gap-4 w-full md:w-auto">
+                            <div className="flex flex-wrap gap-2 justify-end">
+                                {cashUnits.map((denom) => (
+                                    <Button
+                                        key={denom}
+                                        onClick={() => handleInsertMoney(denom)}
+                                        variant="outline"
+                                        size="sm"
+                                        className="min-w-[60px]"
+                                    >
+                                        {formatCurrency(denom)}
+                                    </Button>
+                                ))}
+                            </div>
+                            <div className="flex items-center gap-4 justify-end">
+                                <div className="text-right">
+                                    <p className="text-sm text-gray-500">Total Inserted</p>
+                                    <p className="text-xl font-bold text-blue-600">{formatCurrency(totalInserted)}</p>
+                                </div>
+                                <Button
+                                    onClick={handleReturnMoney}
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-gray-500 hover:text-red-600"
+                                    title="Return Money"
+                                >
+                                    <RotateCcw className="h-5 w-5" />
+                                </Button>
+                                <Button
+                                    onClick={handlePurchase}
+                                    disabled={!selectedProduct || totalInserted < (selectedProduct?.price || 0) || loading}
+                                    isLoading={loading}
+                                    size="lg"
+                                    className={cn(
+                                        "min-w-[120px]",
+                                        selectedProduct && totalInserted >= selectedProduct.price
+                                            ? "bg-green-600 hover:bg-green-700"
+                                            : ""
+                                    )}
+                                >
+                                    Purchase
+                                </Button>
+                            </div>
                         </div>
                     </div>
                 </Card>
