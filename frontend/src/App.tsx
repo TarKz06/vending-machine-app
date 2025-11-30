@@ -1,71 +1,48 @@
-// src/App.tsx
-import { useEffect, useState } from "react";
-import { fetchProducts } from "./features/vending/api";
-import { ProductList } from "./features/vending/components/ProductList";
-import { PurchaseForm } from "./features/vending/components/PurchaseForm";
-import type { Product } from "./features/vending/types";
+import { useState } from 'react';
+import { CustomerPage } from '@/pages/CustomerPage';
+import { AdminProductsPage } from '@/pages/AdminProductsPage';
+import { AdminCashPage } from '@/pages/AdminCashPage';
+import { Button } from '@/components/Button';
+
+type Page = 'customer' | 'admin-products' | 'admin-cash';
 
 function App() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const load = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await fetchProducts();
-        setProducts(data);
-      } catch (e: unknown) {
-        if (e instanceof Error) {
-          setError(e.message);
-        } else {
-          setError("Failed to load products.");
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, []);
+  const [currentPage, setCurrentPage] = useState<Page>('customer');
 
   return (
-    <div
-      style={{
-        maxWidth: 800,
-        margin: "40px auto",
-        padding: "0 16px 40px",
-        fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
-      }}
-    >
-      <header style={{ marginBottom: 32 }}>
-        <h1 style={{ margin: 0 }}>Vending Machine</h1>
-        <p style={{ marginTop: 8, color: "#555" }}>
-          Select a product, insert money, and see the calculated change.
-        </p>
-      </header>
+    <div className="min-h-screen bg-gray-50">
+      <nav className="bg-white border-b border-gray-200 sticky top-0 z-40">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+          <div className="font-bold text-xl text-blue-600">VendingApp</div>
+          <div className="flex gap-2">
+            <Button
+              variant={currentPage === 'customer' ? 'primary' : 'ghost'}
+              onClick={() => setCurrentPage('customer')}
+              size="sm"
+            >
+              Customer
+            </Button>
+            <Button
+              variant={currentPage === 'admin-products' ? 'primary' : 'ghost'}
+              onClick={() => setCurrentPage('admin-products')}
+              size="sm"
+            >
+              Products
+            </Button>
+            <Button
+              variant={currentPage === 'admin-cash' ? 'primary' : 'ghost'}
+              onClick={() => setCurrentPage('admin-cash')}
+              size="sm"
+            >
+              Cash Units
+            </Button>
+          </div>
+        </div>
+      </nav>
 
-      {loading && <p>Loading products...</p>}
-      {error && (
-        <p style={{ color: "red", marginBottom: 16 }}>
-          {error}
-        </p>
-      )}
-
-      {!loading && !error && (
-        <>
-          <section style={{ marginBottom: 32 }}>
-            <h2 style={{ marginBottom: 8 }}>Available Products</h2>
-            <ProductList products={products} />
-          </section>
-
-          <section>
-            <h2 style={{ marginBottom: 8 }}>Purchase</h2>
-            <PurchaseForm products={products} />
-          </section>
-        </>
-      )}
+      {currentPage === 'customer' && <CustomerPage />}
+      {currentPage === 'admin-products' && <AdminProductsPage />}
+      {currentPage === 'admin-cash' && <AdminCashPage />}
     </div>
   );
 }
