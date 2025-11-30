@@ -107,10 +107,7 @@ export function AdminCashPage() {
         if (!result.isConfirmed) return;
 
         try {
-            const updatedUnits = cashUnits.filter(u => u.denomination !== denomination);
-            await api.put('/cash-units', {
-                cash: updatedUnits.map(u => ({ denomination: u.denomination, quantity: u.quantity }))
-            });
+            await api.delete(`/cash-units/${denomination}`);
             fetchCashUnits();
         } catch (err: any) {
             console.error('Delete failed:', err);

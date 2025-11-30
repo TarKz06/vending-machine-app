@@ -32,3 +32,9 @@ def adjust_cash_units(
         return {"status": "ok"}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.delete("/{denomination}")
+def delete_cash_unit(denomination: int, db: Session = Depends(get_db)):
+    service.delete_cash_unit(db, denomination)
+    return {"status": "ok"}
