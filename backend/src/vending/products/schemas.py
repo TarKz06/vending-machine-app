@@ -5,6 +5,7 @@ class ProductBase(BaseModel):
     name: str
     price: int
     is_active: bool = True
+    image_url: str | None = None
 
 
 class ProductCreate(ProductBase):

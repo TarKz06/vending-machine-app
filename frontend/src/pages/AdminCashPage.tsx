@@ -8,6 +8,7 @@ import { api } from '@/lib/api';
 import { type CashUnit } from '@/lib/types';
 import { formatCurrency } from '@/lib/utils';
 import { Plus, Pencil, Trash2, AlertCircle } from 'lucide-react';
+import Swal from 'sweetalert2';
 
 export function AdminCashPage() {
     const [cashUnits, setCashUnits] = useState<CashUnit[]>([]);
@@ -23,15 +24,21 @@ export function AdminCashPage() {
 
     const fetchCashUnits = async () => {
         try {
+            setError(null);
             const response = await api.get<CashUnit[]>('/cash-units');
             setCashUnits(response.data);
-        } catch (err) {
+        } catch (err: any) {
             console.error('Failed to fetch cash units:', err);
-            setError('Failed to load cash units.');
+            const message =
+                err?.response?.data?.detail ||
+                err?.message ||
+                'Failed to load cash units.';
+            setError(message);
         }
     };
 
     const handleOpenModal = (unit?: CashUnit) => {
+        setError(null);
         if (unit) {
             setEditingUnit(unit);
             setFormData({
@@ -77,14 +84,27 @@ export function AdminCashPage() {
             setIsModalOpen(false);
         } catch (err: any) {
             console.error('Operation failed:', err);
-            setError(err.message || err.response?.data?.detail || 'Operation failed. Please try again.');
+            const message =
+                err?.response?.data?.detail ||
+                err?.message ||
+                'Operation failed. Please try again.';
+            setError(message);
         } finally {
             setLoading(false);
         }
     };
 
     const handleDelete = async (denomination: number) => {
-        if (!window.confirm('Are you sure you want to delete this cash unit?')) return;
+        const result = await Swal.fire({
+            title: 'Delete cash unit?',
+            text: `Denomination: ${denomination}`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete',
+            cancelButtonText: 'Cancel',
+        });
+
+        if (!result.isConfirmed) return;
 
         try {
             const updatedUnits = cashUnits.filter(u => u.denomination !== denomination);
@@ -92,9 +112,13 @@ export function AdminCashPage() {
                 cash: updatedUnits.map(u => ({ denomination: u.denomination, quantity: u.quantity }))
             });
             fetchCashUnits();
-        } catch (err) {
+        } catch (err: any) {
             console.error('Delete failed:', err);
-            setError('Failed to delete cash unit.');
+            const message =
+                err?.response?.data?.detail ||
+                err?.message ||
+                'Failed to delete cash unit.';
+            setError(message);
         }
     };
 

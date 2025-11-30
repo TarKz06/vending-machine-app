@@ -8,6 +8,7 @@ import { api } from '@/lib/api';
 import { type Product } from '@/lib/types';
 import { formatCurrency } from '@/lib/utils';
 import { Plus, Pencil, Trash2, AlertCircle } from 'lucide-react';
+import Swal from 'sweetalert2';
 
 export function AdminProductsPage() {
     const [products, setProducts] = useState<Product[]>([]);
@@ -23,22 +24,28 @@ export function AdminProductsPage() {
 
     const fetchProducts = async () => {
         try {
+            setError(null);
             const response = await api.get<Product[]>('/products');
             setProducts(response.data);
-        } catch (err) {
+        } catch (err: any) {
             console.error('Failed to fetch products:', err);
-            setError('Failed to load products.');
+            const message =
+                err?.response?.data?.detail ||
+                err?.message ||
+                'Failed to load products.';
+            setError(message);
         }
     };
 
     const handleOpenModal = (product?: Product) => {
+        setError(null);
         if (product) {
             setEditingProduct(product);
             setFormData({
                 name: product.name,
                 price: product.price.toString(),
                 stock: product.stock_quantity.toString(),
-                image_url: '', // Not supported by backend
+                image_url: '',
             });
         } else {
             setEditingProduct(null);
@@ -57,7 +64,7 @@ export function AdminProductsPage() {
                 name: formData.name,
                 price: parseFloat(formData.price),
                 stock_quantity: parseInt(formData.stock),
-                // image_url: formData.image_url, // Not supported
+                image_url: formData.image_url,
             };
 
             if (editingProduct) {
@@ -70,21 +77,38 @@ export function AdminProductsPage() {
             setIsModalOpen(false);
         } catch (err: any) {
             console.error('Operation failed:', err);
-            setError(err.response?.data?.detail || 'Operation failed. Please try again.');
+            const message =
+                err?.response?.data?.detail ||
+                err?.message ||
+                'Operation failed. Please try again.';
+            setError(message);
         } finally {
             setLoading(false);
         }
     };
 
     const handleDelete = async (id: number) => {
-        if (!window.confirm('Are you sure you want to delete this product?')) return;
+        const result = await Swal.fire({
+            title: 'Delete product?',
+            text: `Product ID: ${id}`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete',
+            cancelButtonText: 'Cancel',
+        });
+
+        if (!result.isConfirmed) return;
 
         try {
             await api.delete(`/products/${id}`);
             fetchProducts();
-        } catch (err) {
+        } catch (err: any) {
             console.error('Delete failed:', err);
-            setError('Failed to delete product.');
+            const message =
+                err?.response?.data?.detail ||
+                err?.message ||
+                'Failed to delete product.';
+            setError(message);
         }
     };
 

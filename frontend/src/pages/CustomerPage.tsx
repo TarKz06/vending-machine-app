@@ -25,11 +25,16 @@ export function CustomerPage() {
 
     const fetchProducts = async () => {
         try {
+            setError(null);
             const response = await api.get<Product[]>('/products');
             setProducts(response.data);
-        } catch (err) {
+        } catch (err: any) {
             console.error('Failed to fetch products:', err);
-            setError('Failed to load products. Please try again later.');
+            const message =
+                err?.response?.data?.detail ||
+                err?.message ||
+                'Failed to load products. Please try again later.';
+            setError(message);
         }
     };
 
@@ -57,12 +62,16 @@ export function CustomerPage() {
             });
             setPurchaseResult(response.data);
             setShowResultModal(true);
-            fetchProducts(); // Refresh stock
+            fetchProducts();
             setSelectedProduct(null);
             setInsertedMoney('');
         } catch (err: any) {
             console.error('Purchase failed:', err);
-            setError(err.response?.data?.detail || 'Purchase failed. Please try again.');
+            const message =
+                err?.response?.data?.detail ||
+                err?.message ||
+                'Purchase failed. Please try again.';
+            setError(message);
         } finally {
             setLoading(false);
         }
@@ -88,7 +97,10 @@ export function CustomerPage() {
                         <ProductCard
                             key={product.id}
                             product={product}
-                            onSelect={setSelectedProduct}
+                            onSelect={(p) => {
+                                setError(null);
+                                setSelectedProduct(p);
+                            }}
                             isSelected={selectedProduct?.id === product.id}
                         />
                     ))}
@@ -113,7 +125,10 @@ export function CustomerPage() {
                                 type="number"
                                 placeholder="Insert Money (THB)"
                                 value={insertedMoney}
-                                onChange={(e) => setInsertedMoney(e.target.value)}
+                                onChange={(e) => {
+                                    setError(null);
+                                    setInsertedMoney(e.target.value);
+                                }}
                                 className="w-full md:w-48"
                                 min="0"
                             />

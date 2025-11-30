@@ -10,3 +10,4 @@ class Product(Base):
     price = Column(Integer, nullable=False)  # THB
     stock_quantity = Column(Integer, nullable=False, default=0)
     is_active = Column(Boolean, nullable=False, default=True)
+    image_url = Column(String(500), nullable=True)

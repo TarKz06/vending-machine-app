@@ -38,3 +38,12 @@ def update_product(
     db.commit()
     db.refresh(product)
     return product
+
+
+def delete_product(db: Session, product_id: int) -> bool:
+    product = get_product(db, product_id)
+    if not product:
+        return False
+    product.is_active = False
+    db.commit()
+    return True
