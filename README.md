@@ -1,104 +1,173 @@
-
 # Vending Machine App
-
 
 ## Overview
 
-This project is a backend solution for a simple vending machine system.
-It provides APIs for managing product stocks, managing cash units inside the machine, and performing a purchase transaction with validation and change calculation.
-The architecture is designed to be modular, maintainable, and production-ready, following industry best practices.
+This project is a **full-stack vending machine system** consisting of:
 
+* **Backend**: FastAPI + PostgreSQL
+* **Frontend**: React + TypeScript + Vite + Tailwind CSS
+* **Docker**: docker-compose to run `db + backend + frontend` together
+
+The system provides:
+
+* APIs for managing products and cash units
+* Purchase flow with validation and change calculation
+* Simple admin UI for managing products and cash units
+* Customer UI to select products, insert money, and see change breakdown
+
+The architecture is designed to be modular, maintainable, and production-ready.
+
+---
 
 ## Features
 
-- CRUD operations for products (create, update, delete, list)
+### Backend
 
-- CRUD operations for cash units (manage coin/banknote stock)
+* CRUD operations for **products** (create, update, delete, list)
+* CRUD operations for **cash units** (manage coin/banknote stock)
+* **Purchase API** with:
 
-    - Purchase API with:
+  * Stock validation
+  * Payment validation
+  * Change calculation
+  * Inventory update after purchase
+* RESTful API structure with versioning: `/api/v1`
+* Ready for Docker deployment
+* Unit tests (Pytest)
 
-    -  Stock validation
+### Frontend
 
-    - Payment validation
+* **Customer page**
 
-    - Change calculation
+  * Show product cards (name, price, stock, image)
+  * Select product
+  * Insert money and perform purchase
+  * Show change amount and change breakdown
+* **Admin pages**
 
-- Updating inventory after purchase
+  * Manage products (name, price, stock, image url)
+  * Manage cash units (denominations & quantities)
+* Built with React + TypeScript + Tailwind, packaged with Nginx in Docker
 
-- RESTful API structure with versioning (/api/v1)
+---
 
-- Ready for Docker deployment
-
-- Unit tests included (Pytest)
 ## Tech Stack
 
-- FastAPI (Python)
+* **Backend**
 
-- PostgreSQL
+  * FastAPI (Python)
+  * PostgreSQL
+  * SQLAlchemy ORM
+* **Frontend**
 
-- Docker & Docker Compose
+  * React + TypeScript + Vite
+  * Tailwind CSS
+* **Infra**
 
-- SQLAlchemy ORM
-## How to Run (Docker)
+  * Docker & Docker Compose
+  * Nginx (for serving frontend build)
 
-Make sure Docker Desktop is running.
+---
 
-Build and start the services:
+## How to Run with Docker (recommended for local)
+
+Make sure **Docker Desktop** is running.
+
+From the project root (where `docker-compose.yml` is):
 
 ```bash
 docker compose up --build
 ```
 
-Stop services:
+Stop all services:
+
 ```bash
 docker compose down
 ```
 
-
 Backend will be available at:
+
 ```bash
 http://localhost:8000
 ```
 
-## How to Run (Local Development)
-Create virtual environment
+Frontend will be available at:
+
 ```bash
-http://localhost:8000
+http://localhost:3000
 ```
 
-Install dependencies
+---
+
+## How to Run Backend Locally (Without Docker)
+
+Create virtual environment:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+Install dependencies:
+
 ```bash
 pip install -r requirements.txt
 ```
 
-Start FastAPI server
+Start FastAPI server:
+
 ```bash
 uvicorn src.main:app --reload
 ```
 
 API server will run at:
+
 ```bash
 http://127.0.0.1:8000
 ```
-## Run Tests
 
-Execute unit tests with:
+---
+
+## How to Run Frontend Locally
+
+Install dependencies:
+
 ```bash
-pytest -v
+npm install
 ```
+
+Start dev server:
+
+```bash
+npm run dev
+```
+
+Frontend will be available at:
+
+```bash
+http://localhost:5173
+```
+
+---
+
 ## API Documentation
 
-
 Swagger UI:
+
 ```bash
 http://localhost:8000/docs
 ```
 
 Redoc:
+
 ```bash
 http://localhost:8000/redoc
 ```
+
+---
+
 ## Project Structure
+
 ```bash
 vending-machine-app/
 │
@@ -106,19 +175,8 @@ vending-machine-app/
 │   ├── src/
 │   │   ├── vending/
 │   │   │   ├── products/
-│   │   │   │   ├── router.py
-│   │   │   │   ├── schemas.py
-│   │   │   │   ├── models.py
-│   │   │   │   └── service.py
 │   │   │   ├── cash/
-│   │   │   │   ├── router.py
-│   │   │   │   ├── schemas.py
-│   │   │   │   ├── models.py
-│   │   │   │   └── service.py
-│   │   │   ├── purchase/
-│   │   │   │   ├── router.py
-│   │   │   │   ├── schemas.py
-│   │   │   │   └── service.py
+│   │   │   └── purchase/
 │   │   ├── config.py
 │   │   ├── database.py
 │   │   └── main.py
@@ -126,6 +184,28 @@ vending-machine-app/
 │   ├── requirements.txt
 │   └── Dockerfile
 │
+├── frontend/
+│   ├── src/
+│   ├── public/
+│   ├── vite.config.ts
+│   ├── Dockerfile
+│   └── nginx.conf
+│
 └── docker-compose.yml
 ```
 
+---
+
+## Testing (Backend)
+
+Run unit tests with:
+
+```bash
+pytest -v
+```
+
+---
+
+## License
+
+MIT License
