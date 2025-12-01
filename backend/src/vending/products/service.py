@@ -39,6 +39,22 @@ def update_product(
     db.refresh(product)
     return product
 
+def create_products_bulk(
+    db: Session,
+    payloads: list[schemas.ProductCreate],
+):
+    products = []
+    for p in payloads:
+        product = models.Product(**p.dict())
+        db.add(product)
+        products.append(product)
+
+    db.commit()
+
+    for product in products:
+        db.refresh(product)
+
+    return products
 
 def delete_product(db: Session, product_id: int) -> bool:
     product = get_product(db, product_id)

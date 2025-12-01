@@ -34,6 +34,17 @@ def create_product(
 ):
     return service.create_product(db, payload)
 
+@router.post(
+    "/bulk",
+    response_model=list[schemas.ProductOut],
+    status_code=status.HTTP_201_CREATED,
+)
+def create_products_bulk(
+    payload: list[schemas.ProductCreate],
+    db: Session = Depends(get_db),
+):
+    return service.create_products_bulk(db, payload)
+
 
 @router.put("/{product_id}", response_model=schemas.ProductOut)
 def update_product(
